@@ -1,0 +1,155 @@
+#pragma METAINFO("RingFitMinecraft", 2, 5, "Tiernan DeFranco")
+#include <switch.gph>
+#include <keyboard.gph>
+#include <mouse.gph>
+
+
+
+
+
+
+
+int runCheck;
+int sprintCheck;
+
+init {
+  bool output;
+  port_status(PORT_USB_C, &output, NULL);
+  if (output != PROTOCOL_HID) port_connect(PORT_USB_C, PROTOCOL_HID);
+  keymapping();
+	mousemapping();
+	runCheck = 0;
+	sprintCheck = 0; 
+}
+main {
+combo_run(StickMouse);
+	
+	key_passthru();
+	mouse_passthru();
+	nowRunning();
+	nowSprinting();
+		
+	
+	if(get_val(ACCEL_2_X) < -20.0)
+			{
+				mouse_set(MBUTTON_2, TRUE);
+			}
+
+	if(is_active(SWITCH_PLUS)) 
+			{
+				mouse_set(MBUTTON_1, TRUE);
+			}
+			if(is_active(SWITCH_HOME)) 
+			{
+				key_set(KEY_ESCAPE, TRUE);
+			}
+	//Inventory
+  if(is_active(SWITCH_X)) 
+	{
+    key_set(KEY_E, TRUE);
+	}
+	if(is_active(SWITCH_Y)) 
+	{
+    mouse_set(MWHEEL_BACKWARD, TRUE);
+	}
+	if(is_active(SWITCH_A)) 
+	{
+   mouse_set(MWHEEL_FORWARD, TRUE);
+	}
+	// JUMP
+	if(is_active(SWITCH_B)) 
+	{
+		if(get_val(ACCEL_1_Y) < -70.0)
+		{
+			key_set(KEY_SPACEBAR, TRUE);
+		}
+	}
+	if(get_val(ACCEL_1_Z) <= -21.4)
+			{
+				if (is_active(SWITCH_R))
+				{
+				
+				key_set(KEY_LEFTSHIFT, TRUE);
+				key_set(KEY_S, TRUE);
+				}
+			}
+			
+			if(get_val(ACCEL_1_Z) <= -21.4 && is_active(SWITCH_ZR))
+			{
+				mouse_set(MBUTTON_2, TRUE);
+			}
+
+			
+	if (runCheck > 50)
+	{
+		key_set(KEY_W, TRUE);
+	}
+	if (sprintCheck > 30)
+	{
+		key_set(KEY_R, TRUE);
+	}
+
+	
+if(runCheck < 0)
+		{
+			runCheck = 0;
+		}
+if(sprintCheck < 0)
+		{
+			sprintCheck = 0;
+		}
+		
+			if (is_active(SWITCH_R))
+			{
+				key_set(KEY_W, FALSE);
+			}
+			
+				if (is_active(SWITCH_ZR))
+			{
+				key_set(KEY_W, FALSE);
+			}
+		
+}
+
+combo StickMouse {
+    fix32 m = get_val(STICK_1_X);
+    fix32 s = (m >= 0.0) ? 1.0 : -1.0;
+    m = abs(m);
+    m = (m >= 10.0) ? ((m - 10.0) * 0.08) : 0.0;
+    mouse_set(MOUSE_X, (int)(m * s));
+ 
+    m = get_val(STICK_1_Y);
+    s = (m >= 0.0) ? 1.0 : -1.0;
+    m = abs(m);
+    m = (m >= 10.0) ? ((m - 10.0) * 0.08) : 0.0;
+    mouse_set(MOUSE_Y, (int)(m * s));
+    wait(0);
+ 
+    wait(6);
+}
+
+void nowRunning()
+{
+	if(get_val(ACCEL_1_Y) < -28.6)
+		{
+			runCheck = 100;	
+				
+		}
+	if(get_val(ACCEL_1_Y) < -23.8 && get_val(ACCEL_1_Y) > -26.7)
+		{
+			runCheck--;
+		}
+	}
+void nowSprinting()
+{
+	if(get_val(ACCEL_1_Y) < -50.6)
+		{
+			sprintCheck = 100;	
+				
+		}
+	if(get_val(ACCEL_1_Y) > -60.0)
+		{
+			sprintCheck--;
+		}
+
+}
